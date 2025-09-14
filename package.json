@@ -5,7 +5,7 @@
   "homepage": "https://CobreTech.github.io/nuam-prototype",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "predeploy": "npm run build",
