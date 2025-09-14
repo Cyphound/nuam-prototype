@@ -9,8 +9,6 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // ⚠️ ¡Elimina completamente la sección "colors" aquí!
-      // En Tailwind v4, los colores se definen en @theme en el CSS.
     },
   },
   plugins: [require("tailwindcss-animate")],
