@@ -18,6 +18,7 @@ import { useState } from 'react' // Hook de React para gestionar el estado.
 import { useRouter } from 'next/navigation' // Hook de Next.js para la navegación.
 import Link from 'next/link' // Componente de Next.js para enlaces de navegación.
 import Image from 'next/image' // Componente de Next.js para optimización de imágenes.
+import { NUAM_LOGO_PATH } from '../utils/paths'
 
 // Componente principal de la página de Login.
 export default function Login() {
@@ -60,7 +61,7 @@ export default function Login() {
           <div className="inline-flex items-center space-x-2 mb-6">
             <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center p-1 animate-glow">
               <Image 
-                src="/images/NuamLogo.jpg" 
+                src={NUAM_LOGO_PATH} 
                 alt="NUAM" 
                 width={40}
                 height={40}
