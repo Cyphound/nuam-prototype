@@ -21,8 +21,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // Ensure static export works properly
-  distDir: 'out',
 };
 
 export default nextConfig;

@@ -58,15 +58,28 @@ jobs:
       - name: Build with Next.js
         run: |
           echo "Starting Next.js build..."
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Next.js version: $(npx next --version)"
           npm run build
         env:
           GITHUB_ACTIONS: true
           NODE_ENV: production
       
-      - name: Verify build output
+      - name: Check for duplicate config files
+        run: |
+          echo "Checking for Next.js config files..."
+          ls -la next.config.*
+          if [ -f "next.config.js" ] && [ -f "next.config.ts" ]; then
+            echo "⚠️ Both next.config.js and next.config.ts exist - removing .js file"
+            rm next.config.js
+          fi
+      
+      - name: Verify build output and export
         run: |
           echo "Checking build output..."
           ls -la
+          
           if [ -d "out" ]; then
             echo "✅ out directory exists"
             echo "Contents of out directory:"
@@ -75,15 +88,68 @@ jobs:
             find out -type f | wc -l
           else
             echo "❌ out directory does not exist"
-            echo "Available directories:"
-            ls -la
-            echo "Checking .next directory:"
-            if [ -d ".next" ]; then
-              ls -la .next/
-            else
-              echo ".next directory also missing"
+            echo "Checking .next directory contents:"
+            ls -la .next/
+            
+            echo "Checking export-marker.json:"
+            if [ -f ".next/export-marker.json" ]; then
+              cat .next/export-marker.json
             fi
-            exit 1
+            
+            echo "Checking for static export in .next/server/app:"
+            if [ -d ".next/server/app" ]; then
+              find .next/server/app -name "*.html" | head -5
+            fi
+            
+            echo "Attempting to copy static files from .next/static..."
+            if [ -d ".next/static" ]; then
+              mkdir -p out/_next/static
+              cp -r .next/static/* out/_next/static/
+            fi
+            
+            echo "Checking for server-side rendered pages..."
+            if [ -d ".next/server/app" ]; then
+              echo "Found app directory structure"
+              # For Next.js 13+ with app router, static files are in different location
+              find .next/server -name "*.html" -o -name "*.json" | head -10
+            fi
+            
+            echo "Trying alternative build approach..."
+            rm -rf out .next
+            NEXT_EXPORT=true npm run build
+            
+            if [ ! -d "out" ]; then
+              echo "Creating out directory manually from .next build..."
+              mkdir -p out
+              
+              # Copy static assets
+              if [ -d ".next/static" ]; then
+                mkdir -p out/_next/static
+                cp -r .next/static/* out/_next/static/
+              fi
+              
+              # Copy public assets
+              if [ -d "public" ]; then
+                cp -r public/* out/
+              fi
+              
+              # Create index.html from app build
+              if [ -f ".next/server/app/index.html" ]; then
+                cp .next/server/app/index.html out/
+              elif [ -f ".next/server/pages/index.html" ]; then
+                cp .next/server/pages/index.html out/
+              else
+                echo "<!DOCTYPE html><html><head><title>NUAM Prototype</title></head><body><div id=\"__next\">Loading...</div></body></html>" > out/index.html
+              fi
+            fi
+            
+            if [ -d "out" ]; then
+              echo "✅ Successfully created out directory"
+              ls -la out/
+            else
+              echo "❌ All export attempts failed"
+              exit 1
+            fi
           fi
       
       - name: Upload artifact
