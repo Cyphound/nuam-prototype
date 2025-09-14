@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const repo = 'nuam-prototype';
-const isGithubActions = process.env.GITHUB_ACTIONS || false;
+const isGithubActions = process.env.GITHUB_ACTIONS === 'true';
 
 let assetPrefix = '';
 let basePath = '';
@@ -17,9 +17,12 @@ const nextConfig: NextConfig = {
   assetPrefix: assetPrefix,
   basePath: basePath,
   trailingSlash: true,
+  skipTrailingSlashRedirect: true,
   images: {
     unoptimized: true,
   },
+  // Ensure static export works properly
+  distDir: 'out',
 };
 
 export default nextConfig;
